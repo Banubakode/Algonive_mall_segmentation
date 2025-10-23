@@ -112,7 +112,8 @@ For any questions or collaboration opportunities, please reach out:
  Thank you for exploring the Algonive Mall Customer Segmentation project!
 ## Happy clustering! 🎉
 
-![Dashboard Screenshot](https://github.com/Banubakode/Algonive_mall_segmentation/blob/main/assets/dashboard.png)
+![Dashboard Screenshot](assets/dashboard.png)
+
 
 
 
