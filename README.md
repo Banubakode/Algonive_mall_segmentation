@@ -71,42 +71,41 @@ An **interactive Plotly Dash dashboard** is included for dynamic visualization o
    cd Algonive_Mall_Segmentation
 
    
-Install dependencies
+## Install dependencies
 
 pip install dash plotly pandas scikit-learn
 
 
-Prepare the dataset
+## Prepare the dataset
 Ensure that the processed dataset file customer_segments.csv (with cluster labels) is placed in the project directory.
 
-Run the Dash app
+## Run the Dash app
 python app.py
 
 
-Open the dashboard
+## Open the dashboard
 Navigate to http://127.0.0.1:8050/
  in your browser to explore the interactive customer segmentation dashboard.
 
-📊 Results & Insights
+## 📊 Results & Insights
 
-Customers segmented into N distinct clusters based on their demographics and spending behavior
+1. Customers segmented into N distinct clusters based on their demographics and spending behavior
 
-Visualization of clusters enables easy identification of high-value and low-value customer groups
+2. Visualization of clusters enables easy identification of high-value and low-value customer groups
 
-Helps businesses create targeted marketing strategies and improve customer engagement
+3. Helps businesses create targeted marketing strategies and improve customer engagement
 
-🔮 Future Enhancements
+## 🔮 Future Enhancements
 
-Add filtering options in the dashboard (e.g., filter by cluster, age range)
-Deploy the dashboard to cloud platforms (Heroku, AWS, etc.) for public access
-Integrate recommendation engines based on customer segments
-Apply dimensionality reduction (PCA, t-SNE) for enhanced visualization
+- Add filtering options in the dashboard (e.g., filter by cluster, age range)
+- Deploy the dashboard to cloud platforms (Heroku, AWS, etc.) for public access
+- Integrate recommendation engines based on customer segments
+- Apply dimensionality reduction (PCA, t-SNE) for enhanced visualization
 
-📞 Contact
-
+## 📞 Contact
 For any questions or collaboration opportunities, please reach out:
-Your Name — banubakodeankita@gmail.com
+## Your Name — banubakodeankita@gmail.com
 
-Thank you for exploring the Algonive Mall Customer Segmentation project!
-Happy clustering! 🎉
+## Thank you for exploring the Algonive Mall Customer Segmentation project!
+## Happy clustering! 🎉
 
