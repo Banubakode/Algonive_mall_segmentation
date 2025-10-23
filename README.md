@@ -104,8 +104,18 @@ Navigate to http://127.0.0.1:8050/
 
 ## 📞 Contact
 For any questions or collaboration opportunities, please reach out:
-## Your Name — banubakodeankita@gmail.com
+ Your Name — banubakodeankita@gmail.com
 
-## Thank you for exploring the Algonive Mall Customer Segmentation project!
+ Thank you for exploring the Algonive Mall Customer Segmentation project!
 ## Happy clustering! 🎉
+
+
+
+
+
+
+
+
+ 
+
 
