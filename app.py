@@ -1,101 +1,44 @@
-# ==============================
-# 📊 Mall Customer Segmentation Dashboard
-# ==============================
-
-import pandas as pd
-import numpy as np
-from sklearn.cluster import KMeans
-import plotly.express as px
-from dash import Dash, dcc, html
+# app.py
 import os
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
+import plotly.express as px
+import pandas as pd
 
-# ------------------------------
-# Load the dataset
-# ------------------------------
-df = pd.read_csv('customer_segments.csv')  # ensure this file is in your root folder
+# Sample data for demo
+df = pd.DataFrame({
+    'x': [1, 2, 3, 4, 5],
+    'y': [10, 15, 13, 17, 14],
+    'category': ['A', 'B', 'A', 'B', 'A']
+})
 
-# ------------------------------
-# KMeans Clustering (optional – only if not pre-labeled)
-# ------------------------------
-if 'Cluster' not in df.columns:
-    X = df[['Age', 'Annual Income (k$)', 'Spending Score (1-100)']]
-    kmeans = KMeans(n_clusters=5, random_state=42)
-    df['Cluster'] = kmeans.fit_predict(X)
+# Initialize Dash app
+app = dash.Dash(__name__)
+server = app.server  # <- needed for Render
 
-# ------------------------------
-# Initialize the Dash app
-# ------------------------------
-app = Dash(__name__)
-
-app.title = "Mall Customer Segmentation Dashboard"
-
-# ------------------------------
 # Layout
-# ------------------------------
 app.layout = html.Div([
-    html.H1("🛍️ Mall Customer Segmentation Dashboard", style={'textAlign': 'center'}),
-
-    html.Div([
-        html.Label("Select feature for X-axis:"),
-        dcc.Dropdown(
-            id='x-axis',
-            options=[
-                {'label': 'Age', 'value': 'Age'},
-                {'label': 'Annual Income (k$)', 'value': 'Annual Income (k$)'},
-                {'label': 'Spending Score (1-100)', 'value': 'Spending Score (1-100)'}
-            ],
-            value='Annual Income (k$)',
-            clearable=False
-        ),
-    ], style={'width': '48%', 'display': 'inline-block'}),
-
-    html.Div([
-        html.Label("Select feature for Y-axis:"),
-        dcc.Dropdown(
-            id='y-axis',
-            options=[
-                {'label': 'Age', 'value': 'Age'},
-                {'label': 'Annual Income (k$)', 'value': 'Annual Income (k$)'},
-                {'label': 'Spending Score (1-100)', 'value': 'Spending Score (1-100)'}
-            ],
-            value='Spending Score (1-100)',
-            clearable=False
-        ),
-    ], style={'width': '48%', 'float': 'right', 'display': 'inline-block'}),
-
+    html.H1("Dashboard Example for Render"),
+    dcc.Dropdown(
+        id='dropdown',
+        options=[{'label': c, 'value': c} for c in df['category'].unique()],
+        value='A'
+    ),
     dcc.Graph(id='cluster-graph')
 ])
 
-# ------------------------------
-# Callback
-# ------------------------------
+# Callback to update graph
 @app.callback(
-    output=dcc.Output('cluster-graph', 'figure'),
-    inputs=[
-        dcc.Input('x-axis', 'value'),
-        dcc.Input('y-axis', 'value')
-    ]
+    Output('cluster-graph', 'figure'),
+    Input('dropdown', 'value')
 )
-def update_graph(x_axis, y_axis):
-    fig = px.scatter(
-        df,
-        x=x_axis,
-        y=y_axis,
-        color='Cluster',
-        hover_data=['Age', 'Annual Income (k$)', 'Spending Score (1-100)'],
-        title=f'Customer Segmentation: {x_axis} vs {y_axis}'
-    )
-    fig.update_layout(transition_duration=500)
+def update_graph(selected_category):
+    filtered_df = df[df['category'] == selected_category]
+    fig = px.scatter(filtered_df, x='x', y='y', color='category', title=f"Category: {selected_category}")
     return fig
 
-# ------------------------------
-# Run the server (Render compatible)
-# ------------------------------
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8050))  # Render assigns this automatically
-    app.run_server(host="0.0.0.0", port=port, debug=False)
-
-
-
-
-
+# Run server
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8050))  # Render provides PORT environment variable
+    app.run_server(host='0.0.0.0', port=port, debug=False)
