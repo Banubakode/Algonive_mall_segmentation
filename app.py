@@ -1,44 +1,49 @@
-# app.py
-import os
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 
-# Sample data for demo
-df = pd.DataFrame({
-    'x': [1, 2, 3, 4, 5],
-    'y': [10, 15, 13, 17, 14],
-    'category': ['A', 'B', 'A', 'B', 'A']
-})
+# Sample Data
+data = {
+    'Category': ['Electronics', 'Clothing', 'Groceries', 'Books'],
+    'Sales': [20000, 15000, 30000, 10000],
+    'Profit': [5000, 4000, 7000, 2000]
+}
+df = pd.DataFrame(data)
 
-# Initialize Dash app
+# Initialize the Dash app
 app = dash.Dash(__name__)
-server = app.server  # <- needed for Render
+server = app.server
+
+# Pie Chart
+fig_pie = px.pie(df, names='Category', values='Sales', title='Sales Distribution')
+
+# Bar Graph
+fig_bar = px.bar(df, x='Category', y='Sales', title='Sales by Category', text='Sales')
 
 # Layout
-app.layout = html.Div([
-    html.H1("Dashboard Example for Render"),
-    dcc.Dropdown(
-        id='dropdown',
-        options=[{'label': c, 'value': c} for c in df['category'].unique()],
-        value='A'
-    ),
-    dcc.Graph(id='cluster-graph')
+app.layout = html.Div(style={'font-family': 'Arial, sans-serif', 'margin': '40px'}, children=[
+    
+    html.H1("Professional Dashboard", style={'text-align': 'center'}),
+    
+    # Summary Section
+    html.Div([
+        html.H3("Summary"),
+        html.P(f"Total Sales: {df['Sales'].sum():,.0f}"),
+        html.P(f"Total Profit: {df['Profit'].sum():,.0f}"),
+        html.P(f"Top Category: {df.loc[df['Sales'].idxmax(), 'Category']}")
+    ], style={'border': '1px solid #ccc', 'padding': '20px', 'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+    
+    # Graph Section
+    html.Div([
+        dcc.Graph(figure=fig_bar)
+    ], style={'width': '65%', 'display': 'inline-block', 'padding-left': '30px'}),
+    
+    # Pie Chart Section
+    html.Div([
+        dcc.Graph(figure=fig_pie)
+    ], style={'width': '50%', 'padding-top': '50px'})
 ])
 
-# Callback to update graph
-@app.callback(
-    Output('cluster-graph', 'figure'),
-    Input('dropdown', 'value')
-)
-def update_graph(selected_category):
-    filtered_df = df[df['category'] == selected_category]
-    fig = px.scatter(filtered_df, x='x', y='y', color='category', title=f"Category: {selected_category}")
-    return fig
-
-# Run server
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8050))  # Render provides PORT environment variable
-    app.run_server(host='0.0.0.0', port=port, debug=False)
+if __name__ == '__main__':
+    app.run_server(debug=True)
