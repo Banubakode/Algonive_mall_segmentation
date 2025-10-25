@@ -1,5 +1,7 @@
 dash
 plotly
 pandas
-scikit-learn
 numpy
+scikit-learn
+gunicorn
+
