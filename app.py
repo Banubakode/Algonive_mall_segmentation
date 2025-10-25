@@ -1,93 +1,99 @@
-# ================================================
-# Customer Segmentation Dashboard using Plotly Dash
-# ================================================
+# ==============================
+# 📊 Mall Customer Segmentation Dashboard
+# ==============================
 
-# ---- Import Libraries ----
-from dash import Dash, dcc, html
 import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
 import plotly.express as px
+from dash import Dash, dcc, html
+import os
 
-# ---- Load the Processed Customer Data ----
-# Make sure this file is in the same folder as this script
-df = pd.read_csv('customer_segments.csv')
+# ------------------------------
+# Load the dataset
+# ------------------------------
+df = pd.read_csv('customer_segments.csv')  # ensure this file is in your root folder
 
-# ---- Create Cluster Profile Summary ----
-cluster_profiles = df.groupby('Cluster Label').agg({
-    'Age': ['mean', 'min', 'max'],
-    'Annual Income (k$)': ['mean', 'min', 'max'],
-    'Spending Score (1-100)': ['mean', 'min', 'max'],
-    'CustomerID': 'count'
-}).round(2)
+# ------------------------------
+# KMeans Clustering (optional – only if not pre-labeled)
+# ------------------------------
+if 'Cluster' not in df.columns:
+    X = df[['Age', 'Annual Income (k$)', 'Spending Score (1-100)']]
+    kmeans = KMeans(n_clusters=5, random_state=42)
+    df['Cluster'] = kmeans.fit_predict(X)
 
-# Flatten the multi-level column names
-cluster_profiles.columns = ['_'.join(col) for col in cluster_profiles.columns]
-cluster_profiles = cluster_profiles.reset_index()
-
-# ---- Create Visualizations ----
-
-# Scatter Plot: Annual Income vs Spending Score by Cluster
-scatter_fig = px.scatter(
-    df,
-    x='Annual Income (k$)',
-    y='Spending Score (1-100)',
-    color='Cluster Label',
-    title='Customer Segments: Income vs Spending Score',
-    template='plotly_dark',
-    hover_data=['Age']
-)
-
-# Pie Chart: Customer distribution across clusters
-cluster_counts = df['Cluster Label'].value_counts().reset_index()
-cluster_counts.columns = ['Cluster Label', 'Count']
-
-pie_fig = px.pie(
-    cluster_counts,
-    names='Cluster Label',
-    values='Count',
-    title='Customer Distribution by Cluster',
-    hole=0.3,
-    color_discrete_sequence=px.colors.qualitative.Bold
-)
-
-# ---- Initialize Dash App ----
+# ------------------------------
+# Initialize the Dash app
+# ------------------------------
 app = Dash(__name__)
 
-# ---- Layout of the Dashboard ----
+app.title = "Mall Customer Segmentation Dashboard"
+
+# ------------------------------
+# Layout
+# ------------------------------
 app.layout = html.Div([
-    html.H1(
-        '🧩 Customer Segmentation Dashboard',
-        style={'textAlign': 'center', 'color': '#2E86C1'}
-    ),
+    html.H1("🛍️ Mall Customer Segmentation Dashboard", style={'textAlign': 'center'}),
 
     html.Div([
-        dcc.Graph(figure=scatter_fig),
-        dcc.Graph(figure=pie_fig)
-    ], style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'}),
-
-    html.H3('Cluster Profile Summary', style={'textAlign': 'center'}),
-
-    # Display cluster summary table
-    html.Table([
-        html.Thead(
-            html.Tr([html.Th(col) for col in cluster_profiles.columns])
+        html.Label("Select feature for X-axis:"),
+        dcc.Dropdown(
+            id='x-axis',
+            options=[
+                {'label': 'Age', 'value': 'Age'},
+                {'label': 'Annual Income (k$)', 'value': 'Annual Income (k$)'},
+                {'label': 'Spending Score (1-100)', 'value': 'Spending Score (1-100)'}
+            ],
+            value='Annual Income (k$)',
+            clearable=False
         ),
-        html.Tbody([
-            html.Tr([
-                html.Td(cluster_profiles.iloc[i][col]) for col in cluster_profiles.columns
-            ]) for i in range(len(cluster_profiles))
-        ])
-    ], style={
-        'width': '90%',
-        'margin': 'auto',
-        'border': '1px solid black',
-        'borderCollapse': 'collapse',
-        'textAlign': 'center'
-    })
+    ], style={'width': '48%', 'display': 'inline-block'}),
+
+    html.Div([
+        html.Label("Select feature for Y-axis:"),
+        dcc.Dropdown(
+            id='y-axis',
+            options=[
+                {'label': 'Age', 'value': 'Age'},
+                {'label': 'Annual Income (k$)', 'value': 'Annual Income (k$)'},
+                {'label': 'Spending Score (1-100)', 'value': 'Spending Score (1-100)'}
+            ],
+            value='Spending Score (1-100)',
+            clearable=False
+        ),
+    ], style={'width': '48%', 'float': 'right', 'display': 'inline-block'}),
+
+    dcc.Graph(id='cluster-graph')
 ])
 
-# ---- Run the Dash App ----
+# ------------------------------
+# Callback
+# ------------------------------
+@app.callback(
+    output=dcc.Output('cluster-graph', 'figure'),
+    inputs=[
+        dcc.Input('x-axis', 'value'),
+        dcc.Input('y-axis', 'value')
+    ]
+)
+def update_graph(x_axis, y_axis):
+    fig = px.scatter(
+        df,
+        x=x_axis,
+        y=y_axis,
+        color='Cluster',
+        hover_data=['Age', 'Annual Income (k$)', 'Spending Score (1-100)'],
+        title=f'Customer Segmentation: {x_axis} vs {y_axis}'
+    )
+    fig.update_layout(transition_duration=500)
+    return fig
+
+# ------------------------------
+# Run the server (Render compatible)
+# ------------------------------
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8050))  # Render assigns this automatically
+    app.run_server(host="0.0.0.0", port=port, debug=False)
 
 
 
