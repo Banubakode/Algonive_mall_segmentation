@@ -4,18 +4,11 @@ import plotly.express as px
 import pandas as pd
 
 # ------------------------
-# 1. Sample Customer Data
+# 1. Load Customer Data
 # ------------------------
-# Replace this with your actual customer dataset
-customer_data = {
-    'CustomerID': list(range(1, 200)),
-    'Annual Income (k$)': [86, 40, 87, 47, 70, 60, 90, 30, 50, 80]*20,
-    'Spending Score (1-100)': [81, 60, 20, 40, 90, 35, 15, 70, 50, 60]*20,
-    'Cluster': ['Budget Group', 'Growth Opportunity', 'Luxury Cautious', 'VIP Customers', 
-                'Budget Group', 'Growth Opportunity', 'Luxury Cautious', 'VIP Customers', 
-                'Budget Group', 'Growth Opportunity']*20
-}
-df_customers = pd.DataFrame(customer_data)
+# Place your CSV file in the same folder as app.py
+# CSV should have columns: CustomerID, Annual Income (k$), Spending Score (1-100), Cluster
+df_customers = pd.read_csv("customer_data.csv")
 
 # ------------------------
 # 2. Cluster Summary Data
@@ -38,7 +31,7 @@ df_summary = pd.DataFrame({
 # 3. Initialize Dash App
 # ------------------------
 app = dash.Dash(__name__)
-server = app.server  # Required for Render deployment
+server = app.server  # Required for Render
 
 # ------------------------
 # 4. Scatter Plot: Income vs Spending Score
@@ -67,13 +60,13 @@ app.layout = html.Div(style={'font-family': 'Arial, sans-serif', 'margin': '20px
     # Dashboard Title with emoji
     html.H1("🧩 Customer Segmentation Dashboard", style={'text-align': 'center', 'margin-bottom': '30px'}),
 
-    # Top Row: Scatter Plot
+    # Scatter Plot
     html.Div(dcc.Graph(figure=fig_scatter), style={'width': '100%'}),
 
-    # Middle Row: Pie Chart
+    # Pie Chart
     html.Div(dcc.Graph(figure=fig_pie), style={'width': '50%', 'margin-top': '40px'}),
 
-    # Bottom Row: Cluster Summary Table
+    # Cluster Summary Table
     html.Div([
         html.H3("Cluster Profile Summary", style={'margin-top': '40px'}),
         html.Table([
