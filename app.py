@@ -4,56 +4,93 @@ import plotly.express as px
 import pandas as pd
 
 # ------------------------
-# 1. Sample Data
+# 1. Sample Customer Data
 # ------------------------
-data = {
-    'Category': ['Electronics', 'Clothing', 'Groceries', 'Books'],
-    'Sales': [20000, 15000, 30000, 10000],
-    'Profit': [5000, 4000, 7000, 2000]
+# Replace this with your actual customer dataset
+customer_data = {
+    'CustomerID': list(range(1, 200)),
+    'Annual Income (k$)': [86, 40, 87, 47, 70, 60, 90, 30, 50, 80]*20,
+    'Spending Score (1-100)': [81, 60, 20, 40, 90, 35, 15, 70, 50, 60]*20,
+    'Cluster': ['Budget Group', 'Growth Opportunity', 'Luxury Cautious', 'VIP Customers', 
+                'Budget Group', 'Growth Opportunity', 'Luxury Cautious', 'VIP Customers', 
+                'Budget Group', 'Growth Opportunity']*20
 }
-df = pd.DataFrame(data)
+df_customers = pd.DataFrame(customer_data)
 
 # ------------------------
-# 2. Initialize Dash app
+# 2. Cluster Summary Data
+# ------------------------
+df_summary = pd.DataFrame({
+    'Cluster Label': ['Budget Group', 'Growth Opportunity', 'Luxury Cautious', 'VIP Customers'],
+    'Age_mean': [32.88, 25.44, 39.37, 53.98],
+    'Age_min': [27, 18, 19, 35],
+    'Age_max': [40, 38, 59, 70],
+    'Annual Income (k$)_mean': [86.1, 40, 86.5, 47.71],
+    'Annual Income (k$)_min': [69, 15, 64, 18],
+    'Annual Income (k$)_max': [137, 67, 137, 79],
+    'Spending Score (1-100)_mean': [81.53, 60.3, 19.58, 39.97],
+    'Spending Score (1-100)_min': [58, 6, 1, 3],
+    'Spending Score (1-100)_max': [97, 99, 42, 60],
+    'CustomerID_count': [40, 57, 38, 65]
+})
+
+# ------------------------
+# 3. Initialize Dash App
 # ------------------------
 app = dash.Dash(__name__)
-server = app.server   # Required for Render deployment
+server = app.server  # Required for Render deployment
 
 # ------------------------
-# 3. Create Charts
+# 4. Scatter Plot: Income vs Spending Score
 # ------------------------
-# Pie chart for sales distribution
-fig_pie = px.pie(df, names='Category', values='Sales', title='Sales Distribution')
-
-# Bar chart for sales
-fig_bar = px.bar(df, x='Category', y='Sales', text='Sales', title='Sales by Category')
+fig_scatter = px.scatter(
+    df_customers,
+    x='Annual Income (k$)',
+    y='Spending Score (1-100)',
+    color='Cluster',
+    title='Income vs Spending Score by Cluster',
+    hover_data=['CustomerID']
+)
 
 # ------------------------
-# 4. Layout (Dashboard)
+# 5. Pie Chart: Customer distribution by cluster
 # ------------------------
-app.layout = html.Div(style={'font-family': 'Arial, sans-serif', 'margin': '40px'}, children=[
+cluster_counts = df_customers['Cluster'].value_counts().reset_index()
+cluster_counts.columns = ['Cluster', 'Count']
+fig_pie = px.pie(cluster_counts, names='Cluster', values='Count', title='Customer Distribution by Cluster')
 
-    # Title
-    html.H1("Simple Professional Dashboard", style={'text-align': 'center'}),
+# ------------------------
+# 6. Layout
+# ------------------------
+app.layout = html.Div(style={'font-family': 'Arial, sans-serif', 'margin': '20px'}, children=[
 
-    # Summary section
-    html.Div(style={'border': '1px solid #ccc', 'padding': '20px', 'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}, children=[
-        html.H3("Summary"),
-        html.P(f"Total Sales: ${df['Sales'].sum():,.0f}"),
-        html.P(f"Total Profit: ${df['Profit'].sum():,.0f}"),
-        html.P(f"Top Category: {df.loc[df['Sales'].idxmax(), 'Category']}")
-    ]),
+    # Dashboard Title with emoji
+    html.H1("🧩 Customer Segmentation Dashboard", style={'text-align': 'center', 'margin-bottom': '30px'}),
 
-    # Bar chart
-    html.Div(dcc.Graph(figure=fig_bar), style={'width': '65%', 'display': 'inline-block', 'padding-left': '30px'}),
+    # Top Row: Scatter Plot
+    html.Div(dcc.Graph(figure=fig_scatter), style={'width': '100%'}),
 
-    # Pie chart below
-    html.Div(dcc.Graph(figure=fig_pie), style={'width': '50%', 'padding-top': '50px'})
+    # Middle Row: Pie Chart
+    html.Div(dcc.Graph(figure=fig_pie), style={'width': '50%', 'margin-top': '40px'}),
+
+    # Bottom Row: Cluster Summary Table
+    html.Div([
+        html.H3("Cluster Profile Summary", style={'margin-top': '40px'}),
+        html.Table([
+            html.Thead(
+                html.Tr([html.Th(col, style={'padding': '5px', 'border': '1px solid black'}) for col in df_summary.columns])
+            ),
+            html.Tbody([
+                html.Tr([html.Td(df_summary.iloc[i][col], style={'padding': '5px', 'border': '1px solid black'}) 
+                         for col in df_summary.columns])
+                for i in range(len(df_summary))
+            ])
+        ], style={'border-collapse': 'collapse', 'width': '100%'})
+    ])
 ])
 
 # ------------------------
-# 5. Run the app (local debug)
+# 7. Run Server
 # ------------------------
 if __name__ == '__main__':
     app.run_server(debug=True)
-
